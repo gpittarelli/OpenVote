@@ -91,6 +91,39 @@ if (isset($_POST['submit'])) {
 		{
 			error("Error creating vote");
 		}
+
+		if (!error_occurred())
+		{
+			// All is well! Send out the emails!
+			$EMAIL_TEMPLATE = <<<EMAIL
+%s has requested that you vote in an OpenVote poll.
+
+To vote now, <a href="openvote.gpittarelli.com/vote?t=%s">click here.</a>
+
+Your vote is completely confidential; and you will be able to verify at the end
+of the election that your vote was counted.
+
+Your unique identifier is: %s
+
+This number is important because you are the <strong>ONLY PERSON IN THE WORLD</strong>
+who knows that it represents your vote.  As soon as this email as sent, we at
+OpenVote immediately forget that the number was assigned to you.  When the
+election is complete, you will be able to download a list of the identifiers of
+everyone who voted in the election and verify that your vote is on the list and was
+properly counted.
+EMAIL;
+
+			foreach ($SANITIZED['mailing_list'] as $email)
+			{
+				$token = generateToken();
+				$body = sprintf($EMAIL_TEMPLATE,
+									$SANITIZED['author'],
+									$token,
+									$token);
+
+				mail($email, "You have been invited to an OpenVote poll", $body);
+			}
+		}
 	}
 }
 

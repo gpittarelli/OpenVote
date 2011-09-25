@@ -73,6 +73,7 @@ $BASE64_CHARS = array("A","B","C","D","E","F","G","H","I","J","K","L",
  */
 function validate_token($date)
 {
+	global $BASE64_CHARS;
 	$chars = split($date, "");
 	if (count($chars) !== 44)
 	{
@@ -96,6 +97,7 @@ function validate_token($date)
  */
 function generateToken()
 {
+	global $BASE64_CHARS;
 	$out = array();
 
 	for($x = 0; $x < 44; $x++)
