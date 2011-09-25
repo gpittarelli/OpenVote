@@ -1,6 +1,7 @@
 RewriteEngine On
 
 RewriteRule ^startvote$ startvote.php [L]
+RewriteRule ^index$ index.php [L]
 RewriteRule ^vote$ vote.php [L]
 RewriteRule ^about$ about.php [L]
 RewriteRule ^admin$ adminvote.php [L]

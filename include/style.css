@@ -10,7 +10,7 @@ header {
 	background-repeat: repeat-x;
 }
 
-header>h1 {
+header h1 {
 	position: relative;
 	top: 49px;
 	margin-right: auto;
@@ -45,6 +45,10 @@ section#description>p {
 section#startvote {
 	width: 800px;
 	margin: 50px auto 0;
+}
+
+section#startvote h2 {
+	text-align: center;
 }
 
 section#startvote table {

@@ -80,6 +80,9 @@ if (isset($_POST['submit'])) {
 
 if (!isset($_POST['submit']) || error_occurred()) { ?>
     <section id="startvote">
+    	<h2>
+    		Create a New Vote:
+    	</h2>
     	<?php
     	if (error_occurred()) {
     		echo "<ul>";

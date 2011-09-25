@@ -47,5 +47,5 @@ require('include/model.php');
 <body>
   <div>
     <header>
-      <h1>OpenVote</h1>
+      <a href="index"><h1>OpenVote</h1></a>
     </header>
