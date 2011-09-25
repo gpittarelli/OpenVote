@@ -11,41 +11,56 @@ function error($error) {
 function error_occurred() { return empty($ERR); }
 
 if (isset($_POST['submit'])) {
-	try
+	$SAFE_INPUT = Array('title', 'author', 'admin_email',
+						'desciption', 'mailing_list',
+						'options', 'end_time');
+	$SANITIZED = Array();
+
+	/* Get values out of $_POST. */
+	foreach ($SAFE_INPUT as $key)
 	{
-		$title = safe_extract($_POST, "title");
-		$author = safe_extract($_POST, "author");
-		$admin_email = safe_extract($_POST, "admin_email");
-		$description = safe_extract($_POST, "description");
-		$mailing_list = safe_extract($_POST, "mailing_list");
-		$options = safe_extract($_POST, "options");
-		$end_time = safe_extract($_POST, "end_time");
-	}
-	catch (Exception $e)
-	{
-		echo $e;
+		try
+		{
+			$SANITIZED[$key] = safe_extract($_POST, $key);
+		}
+		catch (Exception $e)
+		{
+			error($e);
+		}
 	}
 
- 	try
- 	{
- 		$model = Model::getInstance();
-		$model.connect();
-		$model.insertPoll();
-		$model.close();
+	/* Sanitize fields that need it. */
+	if (!validate_email($SANITIZED['email'])) {
+		error("Email is invalid.");
 	}
-	catch (ModelConnectException $e)
-	{
-		array_push($ERR, "Server error - please try again later");
+
+	if (!validate_date($SANITIZED['end_time'])) {
+		error("End time invalid.");
 	}
-	catch (ModelInsertException $e)
+
+	if (!error_occurred())
 	{
-		array_push($ERR, "Error creating vote");
-	}
-	catch (ModelCloseException $e)
-	{
-		// Not the best of outcomes, but
-		// at least we got the data into
-		// the model.
+	 	try
+	 	{
+	 		$model = Model::getInstance();
+			$model.connect();
+			$model.insertPoll();
+			$model.close();
+		}
+		catch (ModelConnectException $e)
+		{
+			array_push($ERR, "Server error - please try again later");
+		}
+		catch (ModelInsertException $e)
+		{
+			array_push($ERR, "Error creating vote");
+		}
+		catch (ModelCloseException $e)
+		{
+			// Not the best of outcomes, but
+			// at least we got the data into
+			// the model.
+		}
 	}
 }
 
@@ -89,7 +104,7 @@ if (!isset($_POST['submit']) || error_occurred()) { ?>
 					</tr>
 					<tr>
 						<td><label for="end_date">End Date:</label><br />(MM-DD-YYYY hh:mm:ss)</td>
-						<td><input type="text" name="end_date" id="end_date" /></td>
+						<td><input type="text" name="end_date" id="end_date" value=<?php echo strtotime(DATE_FORMAT); ?> /></td>
 					</tr>
 					<tr>
 						<td><input type="reset" name="reset" id="reset" /></td>

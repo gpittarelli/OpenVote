@@ -1,4 +1,4 @@
 RewriteEngine On
 
 RewriteRule ^startvote$ startvote.php [L]
-RewriteRule ^create$ createvote.php [L]
+RewriteRule ^vote$ vote.php [L]
