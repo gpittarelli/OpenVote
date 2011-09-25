@@ -1,8 +1,9 @@
 <?php
 
 /* Global settings we won't trust the server to enforce. */
-error_reporting(0);
+// error_reporting(0);
 
+require('include/config.php');
 require('include/utility.php');
 require('include/model.php');
 

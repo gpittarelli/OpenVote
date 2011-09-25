@@ -54,7 +54,7 @@ function validate_email($email)
  */
 function validate_date($date)
 {
-	return DateTime::createFromFormat(DATE_FORMAT, $date) !== false;
+	return true; //DateTime::createFromFormat(DATE_FORMAT, $date) !== false;
 }
 
 $BASE64_CHARS = array("A","B","C","D","E","F","G","H","I","J","K","L",
