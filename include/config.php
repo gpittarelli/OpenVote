@@ -13,7 +13,7 @@ define("DATABASE_PASSWORD", "ovote123!");
 
 /* Date Format */
 
-define("DATE_FORMAT", "m-d-y h:i:s");
+define("DATE_FORMAT", "Y-m-d");
 
 /* Email */
 define("EMAIL_HEADERS", "Content-Type: text/html; charset=ISO-8859-1\r\n");

@@ -1,5 +1,9 @@
 <?php
 
+require_once("include/utility.php");
+require_once("include/config.php");
+require_once("include/model.php");
+
 /* datadump?p=<poll_id>
  * Prints out the options for the given poll and
  * all of the vote tokens for each option.
@@ -13,8 +17,6 @@ header("Content-type: text/plain");
 
 $poll_id = (int)$_GET['p'];
 
-require("include/model.php");
-
 $poll;
 $votes;
 
@@ -23,8 +25,10 @@ try
 	$model = Model::getInstance();
 	$model->connect();
 	$poll = $model->fetchPoll($poll_id);
-	$votes = $model->fetchVotesForPoll($poll_id);
-	$model->close();
+	$options = $model->getPollOptions($poll_id);
+
+	//$votes = $model->fetchVotesForPollForOption($poll_id);
+	//$model->close();
 }
 catch (ModelConnectException $e)
 {
@@ -43,11 +47,23 @@ catch (ModelCloseException $e)
 
 echo "Poll: " . $poll->title . " (" . count($votes) . " total votes)\n\n";
 
-$options = $poll->options;
-sort($options);
+//$options = $poll->options;
+//sort($options);
 
 foreach ($options as $option) {
-
+	echo "$option\n";
+	try
+	{
+		$votes = $model->fetchVotesForPollForOption($poll_id, $option);
+		foreach ($votes as $vote) {
+			echo "$vote\n";
+		}
+	}
+	catch (ModelFetchException $e)
+	{
+		array_push($ERR, "Error fetching poll information.");
+	}
+	echo "\n\n";
 }
 
 ?>
