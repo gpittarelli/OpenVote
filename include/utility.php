@@ -113,10 +113,10 @@ function generateToken()
 
 		array_unshift($out,$q);
 	}
-	$re = array();
+	$re = "";
 	foreach($out as $value)
 	{
-		array_unshift($re,$BASE64_CHARS[$value]);
+		$re .= $BASE64_CHARS[$value];
 	}
 	return $re;
 }
