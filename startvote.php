@@ -81,8 +81,6 @@ if (isset($_POST['submit'])) {
 if (!isset($_POST['submit']) || error_occurred()) { ?>
     <section id="startvote">
     	<?php
-    		var_dump($_POST);
-    		var_dump($ERR);
     	if (error_occurred()) {
     		echo "<ul>";
 			foreach ($ERR as $err) {

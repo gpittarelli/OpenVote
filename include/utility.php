@@ -12,7 +12,7 @@ function error($error) {
 		array_push($ERR, $error);
 	}
 }
-function error_occurred() { return !is_null($ERR); }
+function error_occurred() { return !isset($ERR) || !is_null($ERR); }
 
 /**
  * Safely extracts a value from the given array.  This

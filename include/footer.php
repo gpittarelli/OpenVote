@@ -6,10 +6,10 @@
 </html><?php
 
 $db = Model::getInstance();
-if ($db.isConnected()) {
+if ($db->isConnected()) {
 	try
 	{
-		$db.close();
+		$db->close();
 	}
 	catch (ModelCloseException $e)
 	{

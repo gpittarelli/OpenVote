@@ -5,6 +5,8 @@
 		header("Location: /");
 	}
 
+	$token = $_GET['t'];
+
 	require('include/header.php');
 
 	$poll;
@@ -12,7 +14,8 @@
  	{
  		$model = Model::getInstance();
 		$model->connect();
-		$model->getVote();
+		$vote = $model->fetchVote($token);
+		$poll = $model->fetchPoll($vote->poll_id);
 	}
 	catch (ModelConnectException $e)
 	{
@@ -25,14 +28,20 @@
 	?>
 	<section id="vote">
 		<h2>
-
+			<?php echo $poll->title; ?>
 		</h2>
 
 		<form action="vote" method="post">
-
-
+			<?php echo $poll->title; ?>
+			Options:
 			<ul>
-				<li></li>
+				<?php
+				foreach ($poll->options as $option) {
+					?>
+				<li><input type="checkbox" name="<?php echo $option; ?>"><?php echo $option; ?></li>
+					<?php
+				}
+				?>
 			</ul>
 
 		</form>
