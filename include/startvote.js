@@ -1,11 +1,8 @@
 (function() {
-	DATE_FORMAT = "M-d-y HH:mm:ss";
+	DATE_FORMAT = "yyyy-MM-dd";
 	DATE_FORMAT_ALTS = [DATE_FORMAT
-					   ,"MM-dd-yyyy hh:mm:ssaa"
-					   ,"MM-dd-yyyy hh:mm:ssaa"
-					   ,"MM-dd-yyyy h:mm:ssaa"
-					   ,"MM-dd-yyyy hh:mm:ssAA"
-					   ,"MM-dd-yyyy h:mm:ssAA"];
+					   ,"yyyy-dd-MM"
+					   ,"yy-dd-MM"];
 	$(document).ready(function() {
 		var $input = $("input#end_date");
 		var $preview = $("div#end_date_preview");

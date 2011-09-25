@@ -53,25 +53,32 @@ if (isset($_POST['submit'])) {
 
 	if (isset($SANITIZED['mailing_list'])) {
 		/* Split mailing list into lines. */
-		$SANITIZED['mailing_list'] = preg_split("/[ \r\n\t,;]+/", $SANITIZED['mailing_list']);
+		$SANITIZED['mailing_list'] = preg_split("/[ \n,;]+/", $SANITIZED['mailing_list']);
 		if (count($SANITIZED['mailing_list']) <= 1 && count($SANITIZED['mailing_list']) <= 20) {
 			// Mailing list too short
 			error("A vote needs at least 2 participants.");
 			unset($SANITIZED['mailing_list']);
 		}
 		else {
+			for ($x = 0; $x < count($SANITIZED['mailing_list']); ++$x)
+			{
+				$SANITIZED['mailing_list'][$x] = trim($SANITIZED['mailing_list'][$x]);
+			}
 			// Verify each entry in list is an actual email
 			foreach ($SANITIZED['mailing_list'] as $email) {
 				if (strlen($email) > 3 && !validate_email($email)) {
-					error("Email list contains an invalid email.");
+					error("Email list contains an invalid email: \"" . htmlspecialchars($email) . "\"");
 					unset($SANITIZED['mailing_list']);
 				}
 			}
+			/*
+			 */
+			// $SANITIZED['mailing_list'] = array_map(trim, $SANITIZED['mailing_list'])
 		}
 	}
 	if (isset($SANITIZED['options'])) {
 		/* Split mailing list into lines. */
-		$SANITIZED['options'] = preg_split("/[ \r\n\t,;]+/", $SANITIZED['options']);
+		$SANITIZED['options'] = preg_split("/[\n\t,;]+/", $SANITIZED['options']);
 		if (count($SANITIZED['options']) <= 1) {
 			// Mailing list too short
 			error("A vote needs at least 2 options.");

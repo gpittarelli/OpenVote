@@ -37,9 +37,13 @@
 	}
 	else
 	{
+
 	if (!isset($_GET['t']) || !validate_token($_GET['t'])) {
 		// You shouldn't be here!
-		header("Location: /");
+		//header("Location: /");
+		var_dump($_GET);
+		var_dump(validate_token($_GET['t']));
+		exit();
 	}
 
 	$token = $_GET['t'];
@@ -69,8 +73,12 @@
 			<?php echo $poll->title; ?>
 		</h2>
 
+		<p>
+			<?php echo $poll->description; ?>
+		</p>
+
+
 		<form action="vote" method="post">
-			<?php echo $poll->title; ?>
 			Options:
 			<ul>
 				<input type="hidden" name="token" value="<?php echo $token; ?>" />

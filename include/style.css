@@ -42,12 +42,12 @@ section#description>p {
 	margin-bottom: 1em;
 }
 
-section#startvote {
-	width: 800px;
+section#startvote, section#vote {
+	width: 600px;
 	margin: 50px auto 0;
 }
 
-section#startvote h2 {
+section#startvote h2, section#vote h2 {
 	text-align: center;
 }
 
