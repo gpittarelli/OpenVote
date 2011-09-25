@@ -20,6 +20,8 @@ catch (Exception e)
    // ... Exception handling
 }
 
+All dates are assumed to be: MM-DD-YYYY hh:mm:ss
+
 */
 
 /* Constants */
@@ -48,15 +50,28 @@ class Poll {
 		$this->$options = $options;
 		$this->$mailing_list = $mailing_list;
 		$this->$end_date = $end_date;
-
 	}
 
 	public $id;
 	public $title;
-	public $votes;
-	public $description;
 	public $author;
 	public $author_email;
+	public $description;
+	public $options;
+	public $mailing_list;
+	public $end_date;
+}
+
+class Vote {
+	public function __construct($id = 0, $option = "", $token = "") {
+		$this->$id = $id;
+		$this->$option = $option;
+		$this->$token = $token;
+	}
+
+	public $id;
+	public $option;
+	public $token;
 }
 
 /**
@@ -86,6 +101,8 @@ class Model {
 	 * Connection Methds                       *
 	 *******************************************/
 
+	private $connection;
+
 	/**
 	 * Connect to the data provider.  A hostname, username,
 	 * and/or password may be provided, or they will default
@@ -103,6 +120,10 @@ class Model {
 	public function connect($host = DATABASE_HOST,
 							$user = DATABASE_USER,
 							$password = DATABASE_PASSWORD) {
+		$connection = mysql_connect($host, $user, $password);
+		if (!$connection) {
+			throw new ModelConnectException();
+		}
 	}
 
 	/**
@@ -111,6 +132,9 @@ class Model {
 	 * @throws ModelCloseException
 	 */
 	public function close() {
+		if (!mysql_close($connection)) {
+			throw new ModelCloseException();
+		}
 	}
 
 	/*******************************************
@@ -167,14 +191,24 @@ class Model {
 	}
 
 	/**
-	 * Fetches the option that a given token has voted for
-	 * in a poll.
+	 * Fetches a vote by its token.
 	 *
 	 * @param string $token token associated with the vote
-	 * @return string the option that this
+	 * @return vote the vote with the specified token
 	 * @throws ModelFetchException
 	 */
 	public function fetchVote($token) {
+
+	}
+
+	/**
+	 * Fetches all of the votes for a given poll.
+	 *
+	 * @param number $poll_id poll id to get votes from
+	 * @return array an array of votes
+	 * @throws ModelFetchException
+	 */
+	public function fetchVotesForPoll($poll_id) {
 
 	}
 

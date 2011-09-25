@@ -1,7 +1,15 @@
 <?php
 /* OpenVote - Utility functions */
 
-define("DATE_FORMAT", "m-d-y h:i:sa");
+define("DATE_FORMAT", "m-d-y h:i:s");
+
+/* Cumulative error tracking - useful for forms */
+$ERR = Array(); /* Tracks errors. */
+function error($error) {
+	array_push($ERR, $error);
+}
+
+function error_occurred() { return empty($ERR); }
 
 /**
  * Safely extracts a value from the given array.  This
@@ -20,7 +28,7 @@ function safe_extract($array, $key)
 	{
 		return $array[$key];
 	}
-	throw new Exception("$key is required.");
+	throw new Exception();
 }
 
 /**
@@ -45,7 +53,12 @@ function validate_date($date)
 	return DateTime::createFromFormat() !== false;
 }
 
-$BASE64_CHARS = split("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", "");
+$BASE64_CHARS = array("A","B","C","D","E","F","G","H","I","J","K","L",
+					  "M","N","O","P","Q","R","S","T","U","V","W","X",
+					  "Y","Z","a","b","c","d","e","f","g","h","i","j",
+					  "k","l","m","n","o","p","q","r","s","t","u","v",
+					  "w","x","y","z","0","1","2","3","4","5","6","7",
+					  "8","9","+","/");
 
 /**
  * Checks wether a given token is valid - that is, it meets

@@ -3,39 +3,40 @@
 	  $DATEJS = true;
 	  require('include/header.php');
 
-$ERR = Array(); /* Tracks errors. */
-function error($error) {
-	array_push($ERR, $error);
-}
-
-function error_occurred() { return empty($ERR); }
+$INPUT_FIELDS = Array('title' => 'Title',
+					  'author' => 'Author',
+					  'admin_email' => 'Admin email',
+				 	  'desciption' => 'Description',
+					  'mailing_list' => 'Mailing list',
+					  'options' => 'Options',
+					  'end_time' => 'End date');
 
 if (isset($_POST['submit'])) {
-	$SAFE_INPUT = Array('title', 'author', 'admin_email',
-						'desciption', 'mailing_list',
-						'options', 'end_time');
+	$SAFE_INPUT =
 	$SANITIZED = Array();
 
 	/* Get values out of $_POST. */
-	foreach ($SAFE_INPUT as $key)
+	foreach ($INPUT_FIELDS as $field_name => $user_friendly_name)
 	{
 		try
 		{
-			$SANITIZED[$key] = safe_extract($_POST, $key);
+			$SANITIZED[$field_name] = safe_extract($_POST, $field_name);
 		}
 		catch (Exception $e)
 		{
-			error($e);
+			error($user_friendly_name . " is a required field");
 		}
 	}
 
 	/* Sanitize fields that need it. */
 	if (!validate_email($SANITIZED['email'])) {
 		error("Email is invalid.");
+		unset($SANITIZED['email']);
 	}
 
 	if (!validate_date($SANITIZED['end_time'])) {
 		error("End time invalid.");
+		unset($SANITIZED['end_time']);
 	}
 
 	if (!error_occurred())
@@ -75,7 +76,7 @@ if (!isset($_POST['submit']) || error_occurred()) { ?>
     		echo "</ul>";
     	}
     	?>
-		<form action="createvote" name="startvote_form">
+		<form action="startvote" name="startvote_form">
 			<table>
 				<tbody>
 					<tr>
@@ -103,8 +104,8 @@ if (!isset($_POST['submit']) || error_occurred()) { ?>
 						<td><textarea name="participants" id="participants"></textarea></td>
 					</tr>
 					<tr>
-						<td><label for="end_date">End Date:</label><br />(MM-DD-YYYY hh:mm:ss)</td>
-						<td><input type="text" name="end_date" id="end_date" value=<?php echo strtotime(DATE_FORMAT); ?> /></td>
+						<td><label for="end_date">End Date:</label><noscript><br />(MM-DD-YYYY hh:mm:ss)</noscript></td>
+						<td><input type="text" name="end_date" id="end_date" value="<?php echo date(DATE_FORMAT); ?>" /></td>
 					</tr>
 					<tr>
 						<td><input type="reset" name="reset" id="reset" /></td>
