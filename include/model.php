@@ -325,10 +325,10 @@ SQL;
 			return null;
 		}
 
-		return new Poll($data->poll_id, $data->title, $data->author,
+		return $data; /*new Poll($data->poll_id, $data->title, $data->author,
 						$data->admin_email, $data->desciption,
 						$data->options, $data->mailing_list,
-						$data->end_date);
+						$data->end_date); */
 	}
 
 	/**
@@ -389,8 +389,24 @@ SQL;
 	 * @return array an array of votes
 	 * @throws ModelFetchException
 	 */
-	public function fetchVotesForPoll($poll_id) {
+	public function fetchVotesForPollForOption($poll_id, $option) {
 
+		$result = mysql_query("SELECT * FROM votes WHERE poll_id='$poll_id' AND vote='$option'", $this->connection);
+		if($result ===false) {
+			throw new ModelFetchException("poll options: " . mysql_error());
+		}
+
+		$return = Array();
+		while($row = mysql_fetch_object($result)) {
+			array_push($return, $row->token);
+		}
+		return $return;
+	}
+
+	public function updateVote($token, $option) {
+		$query = "UPDATE  votes SET vote='$option' WHERE token='$token'";
+
+		$result = mysql_query($query, $this->connection);
 	}
 
 };

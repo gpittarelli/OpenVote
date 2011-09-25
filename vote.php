@@ -1,6 +1,42 @@
 <?php
 	require_once("include/utility.php");
 
+	if (isset($_POST['submit'])) {
+
+		require_once('include/header.php');
+
+	 	try
+	 	{
+	 		$model = Model::getInstance();
+			$model->connect();
+			$vote = $model->updateVote($_POST['token'], $_POST['option']);
+		}
+		catch (ModelConnectException $e)
+		{
+			array_push($ERR, "Server error - please try again later");
+		}
+		catch (ModelInsertException $e)
+		{
+			array_push($ERR, "Error creating vote");
+		}
+
+		if (!error_occurred()) {
+
+			?>
+			<section id="startvote">
+				<h2>
+					Vote successfully logged!
+				</h2>
+
+			</section>
+
+			<?php
+
+		}
+
+	}
+	else
+	{
 	if (!isset($_GET['t']) || !validate_token($_GET['t'])) {
 		// You shouldn't be here!
 		header("Location: /");
@@ -16,6 +52,7 @@
  		$model = Model::getInstance();
 		$model->connect();
 		$vote = $model->fetchVote($token);
+		$poll = $model->fetchPoll($vote->poll_id);
 		$options = $model->getPollOptions($vote->poll_id);
 	}
 	catch (ModelConnectException $e)
@@ -26,7 +63,6 @@
 	{
 		array_push($ERR, "Error creating vote");
 	}
-	var_dump($options);
 	?>
 	<section id="vote">
 		<h2>
@@ -37,14 +73,16 @@
 			<?php echo $poll->title; ?>
 			Options:
 			<ul>
+				<input type="hidden" name="token" value="<?php echo $token; ?>" />
 				<?php
 				foreach ($options as $option) {
 					?>
-				<li><input type="checkbox" name="<?php echo $option; ?>"><?php echo $option; ?></li>
+				<li><input type="radio" value="<?php echo $option; ?>" name="option"><?php echo $option; ?></li>
 					<?php
 				}
 				?>
 			</ul>
+			<input type="submit" name="submit" />
 
 		</form>
 
@@ -53,4 +91,6 @@
 
 
 
-<?php require('include/footer.php'); ?>
+<?php
+}
+ require('include/footer.php'); ?>

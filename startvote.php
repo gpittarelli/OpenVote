@@ -54,7 +54,7 @@ if (isset($_POST['submit'])) {
 	if (isset($SANITIZED['mailing_list'])) {
 		/* Split mailing list into lines. */
 		$SANITIZED['mailing_list'] = preg_split("/[ \r\n\t,;]+/", $SANITIZED['mailing_list']);
-		if (count($SANITIZED['mailing_list']) <= 1) {
+		if (count($SANITIZED['mailing_list']) <= 1 && count($SANITIZED['mailing_list']) <= 20) {
 			// Mailing list too short
 			error("A vote needs at least 2 participants.");
 			unset($SANITIZED['mailing_list']);
