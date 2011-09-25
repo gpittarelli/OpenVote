@@ -69,19 +69,42 @@ if (isset($_POST['submit'])) {
 			}
 		}
 	}
+	if (isset($SANITIZED['options'])) {
+		/* Split mailing list into lines. */
+		$SANITIZED['options'] = preg_split("/[ \r\n\t,;]+/", $SANITIZED['options']);
+		if (count($SANITIZED['options']) <= 1) {
+			// Mailing list too short
+			error("A vote needs at least 2 options.");
+			unset($SANITIZED['options']);
+		}
+	}
 
 	if (isset($SANITIZED['end_date']) && !validate_date($SANITIZED['end_date'])) {
+	}
+	if (($timestamp = strtotime($SANITIZED['end_date'])) === false) {
 		error("End time invalid.");
 		unset($SANITIZED['end_date']);
+	} else {
+	    $SANITIZED['end_date'] = date(DATE_FORMAT, $timestamp);
 	}
 
 	if (!error_occurred())
 	{
+		$admin_token = generateToken();
+		$vote_tokens = Array();
+		for ($n=0; $n < count($SANITIZED['mailing_list']); ++$n)
+		{
+			array_push($vote_tokens, generateToken());
+		}
 	 	try
 	 	{
 	 		$model = Model::getInstance();
 			$model->connect();
-			//$model->insertPoll();
+			$model->insertPoll($SANITIZED['title'], $SANITIZED['author'],
+							   $SANITIZED['author_email'], $SANITIZED['description'],
+							   $SANITIZED['options'], $SANITIZED['mailing_list'],
+							   $SANITIZED['end_date'], $admin_token,
+							   $vote_tokens);
 		}
 		catch (ModelConnectException $e)
 		{
@@ -94,9 +117,20 @@ if (isset($_POST['submit'])) {
 
 		if (!error_occurred())
 		{
+			$admin_subject = sprintf(EMAIL_ADMIN_SUBJECT,
+								$SANITIZED['title']);
+
+			$admin_body = sprintf(EMAIL_ADMIN,
+								$SANITIZED['author'],
+								$admin_token);
+
+			mail($email, $admin_subject, $admin_body, EMAIL_HEADERS);
+
+			$n =0;
 			foreach ($SANITIZED['mailing_list'] as $email)
 			{
-				$token = generateToken();
+				$token = $vote_tokens[$n];
+				++$n;
 
 				$subject = sprintf(EMAIL_INVITE_SUBJECT,
 									$SANITIZED['author']);
@@ -110,6 +144,27 @@ if (isset($_POST['submit'])) {
 
 				mail($email, $subject, $body, EMAIL_HEADERS);
 			}
+
+			/* Success message */
+			?>
+		<section id="startvote">
+			<h2>
+				Great success!
+			</h2>
+			<p>
+				Your new poll (<?php echo htmlspecialchars($SANITIZED['title']); ?>) has been created
+				and emails have been sent to the following people:
+				<ul>
+					<?php
+					foreach ($SANITIZED['mailing_list'] as $email)
+					{
+						echo "<li>".$email."</li>";
+					}
+					?>
+				</ul>
+			</p>
+		</section>
+			<?php
 		}
 	}
 }
@@ -156,7 +211,7 @@ if (!isset($_POST['submit']) || error_occurred()) { ?>
 						<td><textarea name="mailing_list" id="mailing_list"><?php echo preserve_textarea("mailing_list"); ?></textarea></td>
 					</tr>
 					<tr>
-						<td><label for="end_date">End Date:</label><noscript><br />(MM-DD-YYYY hh:mm:ss)</noscript></td>
+						<td><label for="end_date">End Date:</label><br />(YYYY-MM-DD)</td>
 						<td><input type="text"<?php echo preserve_field("end_date", date(DATE_FORMAT)); ?> /></td>
 					</tr>
 					<tr>

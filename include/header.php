@@ -3,9 +3,9 @@
 /* Global settings we won't trust the server to enforce. */
 // error_reporting(0);
 
-require('include/config.php');
-require('include/utility.php');
-require('include/model.php');
+require_once('include/config.php');
+require_once('include/utility.php');
+require_once('include/model.php');
 
 ?><!DOCTYPE html>
 <!--[if lt IE 7 ]> <html class="ie6 ie" lang="en"> <![endif]-->

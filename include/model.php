@@ -32,10 +32,10 @@ All dates are assumed to be: MM-DD-YYYY hh:mm:ss
 //define("DATABASE_HOST", "localhost");
 //define("DATABASE_USER", "root");
 //define("DATABASE_PASSWORD", "pass");
-define("DATABASE_HOST", "localhost");
-define("DATABASE_DB", "gpittare_ovote");
-define("DATABASE_USER", "gpittare_ovote");
-define("DATABASE_PASSWORD", "ovote123!");
+//define("DATABASE_HOST", "localhost");
+//define("DATABASE_DB", "c4c");
+//define("DATABASE_USER", "root");
+//define("DATABASE_PASSWORD", "");
 
 /* Exception definitions. */
 class ModelConnectException extends Exception {}
@@ -71,13 +71,13 @@ class Poll {
 }
 
 class Vote {
-	public function __construct($id = 0, $option = "", $token = "") {
-		$this->$id = $id;
-		$this->$option = $option;
-		$this->$token = $token;
+	public function __construct($poll_id = 0, $option = "", $token = "") {
+		$this->poll_id = $poll_id;
+		$this->option = $option;
+		$this->token = $token;
 	}
 
-	public $id;
+	public $poll_id;
 	public $option;
 	public $token;
 }
@@ -174,37 +174,120 @@ class Model {
 	 * 			    for this poll
 	 * @param string $endDate the end date for the poll,
 	 * 				 formatted as "MM-DD-YYYY HH:mm:SS"
-	 *
+	 * @param string $generate_token the unique token for the poll
 	 * @throws ModelInsertException
 	 */
 	public function insertPoll($title, $author, $admin_email,
 							   $description, $options, $mailing_list,
-							   $end_date) {
+							   $end_date, $generate_token, $vote_tokens) {
+
+// inserting the author's detail in the people table
+		$sql = "INSERT into people values('$author','$admin_email')";
+		echo $end_date;
+		if (!mysql_query($sql,$this->connection))
+		{
+		  die('Error: ' . mysql_error());
+	      }
+// inserting the poll detail in the polls table
+		$sql = "INSERT into polls values('$title','$description','$author','$end_date','$generate_token')";
+		if (!mysql_query($sql,$this->connection))
+   	      {
+		  die('Error: ' . mysql_error());
+		}
+// getting the id where the poll was inserted
+		$sql="SHOW TABLE STATUS LIKE 'polls'";
+		$query = mysql_query($sql,$this->connection);
+		$row = mysql_fetch_array($query);
+		$next_id = $row['Auto_increment'] ;
+		$pid = $next_id - 1;
+		$j=-1;
+// inserting the mail list detail into the mails table
+		foreach ($mailing_list as $mailid)
+		{
+			$j++;
+			$sql = "INSERT into mails(mail_id) values('$mailid')";
+			if (!mysql_query($sql,$this->connection))
+			  {
+				  die('Error: ' . mysql_error());
+			  }
+
+		// getting the id where the mail was inserted
+
+			$sql="SHOW TABLE STATUS LIKE 'mails'";
+			$query = mysql_query($sql,$this->connection);
+			$row = mysql_fetch_array($query);
+			$next_id = $row['Auto_increment'] ;
+			$mid = $next_id - 1;
+			$mail_list[$j]=$mid;
+		}
+
+//creating the mail_list table
+
+		foreach($mail_list as $ml)
+		{
+			$sql = "INSERT into mail_list(p_id,m_id) values('$pid','$ml')";
+			if (!mysql_query($sql,$this->connection))
+			  {
+				  die('Error: ' . mysql_error());
+			  }
+		}
+
+
+// inserting the poll options in to the qa table
+		foreach($options as $option)
+		{
+
+		$sql = "INSERT into qa values('$pid','$option')";
+		if (!mysql_query($sql,$this->connection))
+		  {
+		  die('Error: ' . mysql_error());
+		  }
+
+		}
+
+		foreach($vote_tokens as $token)
+		{
+			$sql = "INSERT into votes values('$pid','$token',NULL)";
+			if (!mysql_query($sql,$this->connection))
+			  {
+				  die('Error: ' . mysql_error());
+			  }
+
+		}
 
 	}
 
+	public function getPollOptions($pid)
+	{
+		$result = mysql_query("SELECT * FROM qa WHERE p_id='$pid'", $this->connection);
+		if($result ===false) {
+			throw new ModelFetchException("poll options: " . mysql_error());
+		}
+
+		$return = Array();
+		while($row = mysql_fetch_object($result)) {
+			array_push($return, $row->ans);
+		}
+		return $return;
+	}
+
 	/**
-	 * Insert a new poll into the table.
+	 * Insert a new vote into the table.
 	 *
-	 * @param string $title the title of this poll
-	 * @param string $author
-	 * @param string $description
-	 * @param array $options array of possible options
-	 * 			    for this poll
-	 * @param string $endDate the end date for the poll,
-	 * 				 formatted as "MM-DD-YYYY HH:mm:SS"
-	 *
+	 * @param string $token the title of this poll
+	 * @param string $option the option voted by the user
+	 * @param array $poll_id the unique poll_id for the poll
 	 * @throws ModelInsertException
 	 */
 	public function insertVote($token, $option, $poll_id) {
 		// Example query
 		$query = <<<SQL
 		INSERT INTO `gpittare_ovote`.`Votes`
-             (`id` , `token` , `poll_id` , `option` )
-        VALUES (NULL , '%s', '%d', '%s')
+             (`poll_id` , 'token', 'option' )
+        VALUES ('%s', '%d', '%s')
 SQL;
 		// Insert parameters into the query
-		$query = sprintf($query, $token, $poll_id, $option);
+		$query = sprintf($query, $poll_id, $token, $option);
 
 		// Run query
 		$result = mysql_query($query, $this->connection);
@@ -224,28 +307,28 @@ SQL;
 	 * given id.
 	 *
 	 * @param $id the id of the poll we want to retrieve
-	 * @return Poll the poll with id $id
+	 * @return Poll the poll with id $id, null if there are no rows
 	 * @throws ModelFetchException
 	 */
 	public function fetchPoll($id) {
-		$query = sprintf("SELECT * FROM `Polls` WHERE `id`='%d'", $id);
+		$query = "SELECT * FROM polls WHERE poll_id='$id'";
 
-		$result = mysql_query($query, $connection);
+		$result = mysql_query($query, $this->connection);
 
-		if (!$result) {
-			throw new ModelFetchException("Error fetching poll information.");
+		if ($result === false) {
+			throw new ModelFetchException("Error fetching poll information. ");
 		}
 
 		$data = mysql_fetch_object($result);
 
-		if (!$data) {
-			throw new ModelFetchException("Error fetching poll information.");
+		if ($data === false) {
+			return null;
 		}
 
-		return new Poll($data.id, $data.title, $data.author,
-						$data.admin_email, $data.desciption,
-						$data.options, $data.mailing_list,
-						$data.end_date);
+		return new Poll($data->poll_id, $data->title, $data->author,
+						$data->admin_email, $data->desciption,
+						$data->options, $data->mailing_list,
+						$data->end_date);
 	}
 
 	/**
@@ -258,7 +341,7 @@ SQL;
 	public function fetchIsPollFinished($poll_id) {
 		$query = sprintf("SELECT end_date > now() as finished FROM `Polls` WHERE `id`='%d'", $id);
 
-		$result = mysql_query($query, $connection);
+		$result = mysql_query($query, $this->connection);
 
 		if (!$result) {
 			throw new ModelFetchException("Error fetching poll information.");
@@ -282,25 +365,21 @@ SQL;
 	 * @throws ModelFetchException
 	 */
 	public function fetchVote($token) {
-		$query = sprintf("SELECT * FROM `Votes` WHERE `token`='%s'",
-					mysql_real_escape_string($token, $connections));
+		$query = "SELECT * FROM votes WHERE token='$token'";
 
-		$result = mysql_query($query, $connection);
+		$result = mysql_query($query, $this->connection);
 
-		if (!$result) {
+		if ($result === false) {
 			throw new ModelFetchException("Error fetching poll information.");
 		}
 
-		$data = mysql_fetch_object($result);
-
-		if (!$data) {
-			throw new ModelFetchException("Error fetching poll information.");
+		return mysql_fetch_object($result);
+/*
+		if ($data === false) {
+			throw new ModelFetchException("Error fetching poll information. ".mysql_error($this->connection));
 		}
 
-		return new Poll($data.id, $data.title, $data.author,
-						$data.admin_email, $data.desciption,
-						$data.options, $data.mailing_list,
-						$data.end_date);
+		return new Vote($data->poll_id, $data->vote, $data->token); */
 	}
 
 	/**

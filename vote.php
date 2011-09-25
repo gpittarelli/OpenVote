@@ -1,4 +1,5 @@
 <?php
+	require_once("include/utility.php");
 
 	if (!isset($_GET['t']) || !validate_token($_GET['t'])) {
 		// You shouldn't be here!
@@ -7,7 +8,7 @@
 
 	$token = $_GET['t'];
 
-	require('include/header.php');
+	require_once('include/header.php');
 
 	$poll;
  	try
@@ -15,7 +16,7 @@
  		$model = Model::getInstance();
 		$model->connect();
 		$vote = $model->fetchVote($token);
-		$poll = $model->fetchPoll($vote->poll_id);
+		$options = $model->getPollOptions($vote->poll_id);
 	}
 	catch (ModelConnectException $e)
 	{
@@ -25,6 +26,7 @@
 	{
 		array_push($ERR, "Error creating vote");
 	}
+	var_dump($options);
 	?>
 	<section id="vote">
 		<h2>
@@ -36,7 +38,7 @@
 			Options:
 			<ul>
 				<?php
-				foreach ($poll->options as $option) {
+				foreach ($options as $option) {
 					?>
 				<li><input type="checkbox" name="<?php echo $option; ?>"><?php echo $option; ?></li>
 					<?php

@@ -1,8 +1,6 @@
 <?php
 /* OpenVote - Utility functions */
 
-define("DATE_FORMAT", "m-d-y h:i:s");
-
 /* Cumulative error tracking - useful for forms */
 $ERR = null;
 function error($error) {
@@ -71,10 +69,10 @@ $BASE64_CHARS = array("A","B","C","D","E","F","G","H","I","J","K","L",
  * @param string $token token to validate
  * @return boolean true if $token is a valid token, else false
  */
-function validate_token($date)
+function validate_token($token)
 {
 	global $BASE64_CHARS;
-	$chars = split($date, "");
+	$chars = str_split($token);
 	if (count($chars) !== 44)
 	{
 		return false;
