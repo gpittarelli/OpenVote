@@ -18,7 +18,9 @@
 			identifier which they use to confidentially vote in the
 			poll.  At the end of the poll, anyone may download a list of
 			votes in order to verify the results and ensure that their vote
-			was counted correctly.
+			was counted correctly.  We are also
+			<a href="https://github.com/gpittarelli/OpenVote">Open Source</a>
+			so you can view or improve our code.
 		</p>
     </section>
 <?php require('include/footer.php'); ?>
