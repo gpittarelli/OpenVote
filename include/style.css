@@ -56,8 +56,18 @@ section#startvote input.fail {
 	background-color: #FF5454;
 }
 
+section#about {
+	width: 75%;
+	margin: 1em auto 0;
+}
+
 footer {
 	margin-top: 2em;
 	text-align: center;
+}
+
+footer a {
+	text-decoration: none;
+	color: blue;
 }
 

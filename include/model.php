@@ -129,12 +129,12 @@ class Model {
 							$user = DATABASE_USER,
 							$password = DATABASE_PASSWORD,
 							$db = DATABASE_DB) {
-		$connection = mysql_connect($host, $user, $password);
+		$this->connection = mysql_connect($host, $user, $password);
 		if (!$connection) {
 			throw new ModelConnectException();
 		}
 
-		if (!mysql_select_db($db, $connection)) {
+		if (!mysql_select_db($db, $this->connection)) {
 			throw new ModelConnectException();
 		}
 	}
@@ -145,7 +145,7 @@ class Model {
 	 * @throws ModelCloseException
 	 */
 	public function close() {
-		if (!mysql_close($connection)) {
+		if (!mysql_close($this->connection)) {
 			throw new ModelCloseException();
 		}
 	}
@@ -157,7 +157,7 @@ class Model {
 	 * @return boolean true if this is connected, else false
 	 */
 	public function isConnected() {
-		return $connection !== false;
+		return $this->connection !== false;
 	}
 
 	/*******************************************
@@ -207,7 +207,7 @@ SQL;
 		$query = sprintf($query, $token, $poll_id, $option);
 
 		// Run query
-		$result = mysql_query($query, $connection);
+		$result = mysql_query($query, $this->connection);
 
 		// Test if it went through.
 		if (!$result) {

@@ -2,3 +2,8 @@ RewriteEngine On
 
 RewriteRule ^startvote$ startvote.php [L]
 RewriteRule ^vote$ vote.php [L]
+RewriteRule ^about$ about.php [L]
+RewriteRule ^admin$ adminvote.php [L]
+RewriteRule ^adminvote$ adminvote.php [L]
+RewriteRule ^results$ viewresults.php [L]
+RewriteRule ^viewresults$ viewresults.php [L]

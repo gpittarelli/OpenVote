@@ -1,5 +1,5 @@
     <footer>
-     <p>&copy; Copyright 2011</p>
+     <p>&copy; Copyright 2011 | <a href="about">About</a></p>
     </footer>
   </div>
 </body>
