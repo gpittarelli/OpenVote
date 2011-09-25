@@ -4,15 +4,16 @@
 define("DATE_FORMAT", "m-d-y h:i:s");
 
 /* Cumulative error tracking - useful for forms */
-$ERR = Array();
+$ERR = null;
 function error($error) {
+	global $ERR;
 	if ($ERR === null) {
 		$ERR = Array($error);
 	} else {
 		array_push($ERR, $error);
 	}
 }
-function error_occurred() { return !isset($ERR) || !is_null($ERR); }
+function error_occurred() { global $ERR; return !is_null($ERR); }
 
 /**
  * Safely extracts a value from the given array.  This
@@ -53,7 +54,7 @@ function validate_email($email)
  */
 function validate_date($date)
 {
-	return DateTime::createFromFormat() !== false;
+	return DateTime::createFromFormat(DATE_FORMAT, $date) !== false;
 }
 
 $BASE64_CHARS = array("A","B","C","D","E","F","G","H","I","J","K","L",

@@ -60,6 +60,12 @@ section#startvote input.fail {
 	background-color: #FF5454;
 }
 
+section#startvote ul#errors {
+	width: 260px;
+	margin: 0 auto;
+	color: red;
+}
+
 section#about {
 	width: 75%;
 	margin: 1em auto 0;

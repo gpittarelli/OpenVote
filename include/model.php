@@ -130,7 +130,7 @@ class Model {
 							$password = DATABASE_PASSWORD,
 							$db = DATABASE_DB) {
 		$this->connection = mysql_connect($host, $user, $password);
-		if (!$connection) {
+		if (!$this->connection) {
 			throw new ModelConnectException();
 		}
 

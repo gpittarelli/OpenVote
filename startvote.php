@@ -5,11 +5,28 @@
 
 $INPUT_FIELDS = Array('title' => 'Title',
 					  'author' => 'Author',
-					  'admin_email' => 'Admin email',
-				 	  'desciption' => 'Description',
+					  'author_email' => 'Admin email',
+				 	  'description' => 'Description',
 					  'mailing_list' => 'Mailing list',
 					  'options' => 'Options',
-					  'end_time' => 'End date');
+					  'end_date' => 'End date');
+
+function preserve_field($key, $default = "") {
+	echo " name=\"" . $key . "\" id=\"" . $key . "\"";
+
+	if (isset($SANITIZED) && isset($SANITIZED[$key])) {
+		echo " value=\"" . $SANITIZED[$key] . "\"";
+	} else if ($default !== "") {
+		echo " value=\"" . $default . "\"";
+	}
+}
+
+function preserve_textarea($key) {
+	if (isset($SANITIZED) && isset($SANITIZED[$key])) {
+		echo $SANITIZED[$key];
+	}
+}
+
 
 if (isset($_POST['submit'])) {
 	$SANITIZED = Array();
@@ -24,7 +41,7 @@ if (isset($_POST['submit'])) {
 		catch (Exception $e)
 		{
 			echo "ERROR ERROR ERRROR ".$user_friendly_name;
-			error($user_friendly_name . " is a required field");
+			error($user_friendly_name . " is a required field.");
 		}
 	}
 
@@ -36,8 +53,7 @@ if (isset($_POST['submit'])) {
 
 	if (isset($SANITIZED['mailing_list'])) {
 		/* Split mailing list into lines. */
-		$SANITIZED['mailing_list'] = preg_split("[ \r\n\t,;]+", $SANITIZED['mailing_list']);
-
+		$SANITIZED['mailing_list'] = preg_split("/[ \r\n\t,;]+/", $SANITIZED['mailing_list']);
 		if (count($SANITIZED['mailing_list']) <= 1) {
 			// Mailing list too short
 			error("A vote needs at least 2 participants.");
@@ -54,9 +70,9 @@ if (isset($_POST['submit'])) {
 		}
 	}
 
-	if (isset($SANITIZED['end_time']) && !validate_date($SANITIZED['end_time'])) {
+	if (isset($SANITIZED['end_date']) && !validate_date($SANITIZED['end_date'])) {
 		error("End time invalid.");
-		unset($SANITIZED['end_time']);
+		unset($SANITIZED['end_date']);
 	}
 
 	if (!error_occurred())
@@ -64,16 +80,16 @@ if (isset($_POST['submit'])) {
 	 	try
 	 	{
 	 		$model = Model::getInstance();
-			$model.connect();
-			$model.insertPoll();
+			$model->connect();
+			//$model->insertPoll();
 		}
 		catch (ModelConnectException $e)
 		{
-			array_push($ERR, "Server error - please try again later");
+			error("Server error - please try again later");
 		}
 		catch (ModelInsertException $e)
 		{
-			array_push($ERR, "Error creating vote");
+			error("Error creating vote");
 		}
 	}
 }
@@ -85,7 +101,7 @@ if (!isset($_POST['submit']) || error_occurred()) { ?>
     	</h2>
     	<?php
     	if (error_occurred()) {
-    		echo "<ul>";
+    		echo "<ul id=\"errors\">";
 			foreach ($ERR as $err) {
 				echo "<li>" . $err . "</li>";
 			}
@@ -97,31 +113,31 @@ if (!isset($_POST['submit']) || error_occurred()) { ?>
 				<tbody>
 					<tr>
 						<td><label for="title">Title:</label></td>
-						<td><input type="text" name="title" id="title" /></td>
+						<td><input type="text"<?php echo preserve_field("title"); ?> /></td>
 					</tr>
 					<tr>
 						<td><label for="author">Author Name:</label></td>
-						<td><input type="text" name="author" id="author" /></td>
+						<td><input type="text"<?php echo preserve_field("author"); ?> /></td>
 					</tr>
 					<tr>
 						<td><label for="author_email">Author E-Mail:</label></td>
-						<td><input type="text" name="author_email" id="author_email" /></td>
+						<td><input type="text"<?php echo preserve_field("author_email"); ?> /></td>
 					</tr>
 					<tr>
 						<td><label for="description">Description:</label></td>
-						<td><textarea name="description" id="description"></textarea></td>
+						<td><textarea name="description" id="description"><?php echo preserve_textarea("description"); ?></textarea></td>
 					</tr>
 					<tr>
 						<td><label for="options">Options:</label></td>
-						<td><textarea name="options" id="options"></textarea></td>
+						<td><textarea name="options" id="options"><?php echo preserve_textarea("options"); ?></textarea></td>
 					</tr>
 					<tr>
-						<td><label for="participants">Participants:</label></td>
-						<td><textarea name="participants" id="participants"></textarea></td>
+						<td><label for="mailing_list">Participants:</label></td>
+						<td><textarea name="mailing_list" id="mailing_list"><?php echo preserve_textarea("mailing_list"); ?></textarea></td>
 					</tr>
 					<tr>
 						<td><label for="end_date">End Date:</label><noscript><br />(MM-DD-YYYY hh:mm:ss)</noscript></td>
-						<td><input type="text" name="end_date" id="end_date" value="<?php echo date(DATE_FORMAT); ?>" /></td>
+						<td><input type="text"<?php echo preserve_field("end_date", date(DATE_FORMAT)); ?> /></td>
 					</tr>
 					<tr>
 						<td><input type="reset" name="reset" id="reset" /></td>
