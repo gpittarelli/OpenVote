@@ -4,12 +4,15 @@
 define("DATE_FORMAT", "m-d-y h:i:s");
 
 /* Cumulative error tracking - useful for forms */
-$ERR = Array(); /* Tracks errors. */
+$ERR = Array();
 function error($error) {
-	array_push($ERR, $error);
+	if ($ERR === null) {
+		$ERR = Array($error);
+	} else {
+		array_push($ERR, $error);
+	}
 }
-
-function error_occurred() { return empty($ERR); }
+function error_occurred() { return !is_null($ERR); }
 
 /**
  * Safely extracts a value from the given array.  This

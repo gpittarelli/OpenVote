@@ -3,4 +3,18 @@
     </footer>
   </div>
 </body>
-</html>
+</html><?php
+
+$db = Model::getInstance();
+if ($db.isConnected()) {
+	try
+	{
+		$db.close();
+	}
+	catch (ModelCloseException $e)
+	{
+		// Who really cares?
+	}
+}
+
+?>

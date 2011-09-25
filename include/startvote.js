@@ -1,5 +1,5 @@
 (function() {
-	DATE_FORMAT = "M-d-(y HH:mm:ss";
+	DATE_FORMAT = "M-d-y HH:mm:ss";
 	DATE_FORMAT_ALTS = [DATE_FORMAT
 					   ,"MM-dd-yyyy hh:mm:ssaa"
 					   ,"MM-dd-yyyy hh:mm:ssaa"

@@ -43,7 +43,10 @@ catch (ModelCloseException $e)
 
 echo "Poll: " . $poll->title . " (" . count($votes) . " total votes)\n\n";
 
-foreach ($poll->options as $vote) {
+$options = $poll->options;
+sort($options);
+
+foreach ($options as $option) {
 
 }
 

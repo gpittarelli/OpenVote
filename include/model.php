@@ -1,6 +1,10 @@
 <?php
 /* OpenVote - Model definition
 
+Written to be fairly abstract, but currently uses MySQL
+as a data provider.
+TODO: Use PDO instead of mysql_* functions
+
 Example usage:
 
 $model = Model::getInstance();
@@ -25,9 +29,13 @@ All dates are assumed to be: MM-DD-YYYY hh:mm:ss
 */
 
 /* Constants */
+//define("DATABASE_HOST", "localhost");
+//define("DATABASE_USER", "root");
+//define("DATABASE_PASSWORD", "pass");
 define("DATABASE_HOST", "localhost");
-define("DATABASE_USER", "root");
-define("DATABASE_PASSWORD", "pass");
+define("DATABASE_DB", "gpittare_ovote");
+define("DATABASE_USER", "gpittare_ovote");
+define("DATABASE_PASSWORD", "ovote123!");
 
 /* Exception definitions. */
 class ModelConnectException extends Exception {}
@@ -101,7 +109,7 @@ class Model {
 	 * Connection Methds                       *
 	 *******************************************/
 
-	private $connection;
+	private $connection = false;
 
 	/**
 	 * Connect to the data provider.  A hostname, username,
@@ -119,9 +127,14 @@ class Model {
 	 */
 	public function connect($host = DATABASE_HOST,
 							$user = DATABASE_USER,
-							$password = DATABASE_PASSWORD) {
+							$password = DATABASE_PASSWORD,
+							$db = DATABASE_DB) {
 		$connection = mysql_connect($host, $user, $password);
 		if (!$connection) {
+			throw new ModelConnectException();
+		}
+
+		if (!mysql_select_db($db, $connection)) {
 			throw new ModelConnectException();
 		}
 	}
@@ -135,6 +148,16 @@ class Model {
 		if (!mysql_close($connection)) {
 			throw new ModelCloseException();
 		}
+	}
+
+	/**
+	 * Checks if this connection to the data
+	 * provider is currently connected.
+	 *
+	 * @return boolean true if this is connected, else false
+	 */
+	public function isConnected() {
+		return $connection !== false;
 	}
 
 	/*******************************************
@@ -157,6 +180,7 @@ class Model {
 	public function insertPoll($title, $author, $admin_email,
 							   $description, $options, $mailing_list,
 							   $end_date) {
+
 	}
 
 	/**
@@ -173,6 +197,22 @@ class Model {
 	 * @throws ModelInsertException
 	 */
 	public function insertVote($token, $option, $poll_id) {
+		// Example query
+		$query = <<<SQL
+		INSERT INTO `gpittare_ovote`.`Votes`
+             (`id` , `token` , `poll_id` , `option` )
+        VALUES (NULL , '%s', '%d', '%s')
+SQL;
+		// Insert parameters into the query
+		$query = sprintf($query, $token, $poll_id, $option);
+
+		// Run query
+		$result = mysql_query($query, $connection);
+
+		// Test if it went through.
+		if (!$result) {
+			throw new ModelFetchException("Error registering vote.");
+		}
 	}
 
 	/*******************************************
@@ -188,6 +228,50 @@ class Model {
 	 * @throws ModelFetchException
 	 */
 	public function fetchPoll($id) {
+		$query = sprintf("SELECT * FROM `Polls` WHERE `id`='%d'", $id);
+
+		$result = mysql_query($query, $connection);
+
+		if (!$result) {
+			throw new ModelFetchException("Error fetching poll information.");
+		}
+
+		$data = mysql_fetch_object($result);
+
+		if (!$data) {
+			throw new ModelFetchException("Error fetching poll information.");
+		}
+
+		return new Poll($data.id, $data.title, $data.author,
+						$data.admin_email, $data.desciption,
+						$data.options, $data.mailing_list,
+						$data.end_date);
+	}
+
+	/**
+	 * Fetches a vote by its token.
+	 *
+	 * @param string $token token associated with the vote
+	 * @return vote the vote with the specified token
+	 * @throws ModelFetchException
+	 */
+	public function fetchIsPollFinished($poll_id) {
+		$query = sprintf("SELECT end_date > now() as finished FROM `Polls` WHERE `id`='%d'", $id);
+
+		$result = mysql_query($query, $connection);
+
+		if (!$result) {
+			throw new ModelFetchException("Error fetching poll information.");
+		}
+
+		$data = mysql_fetch_object($result);
+
+		if (!$data) {
+			throw new ModelFetchException("Error fetching poll information.");
+		}
+
+		return !!$data.finished;
+
 	}
 
 	/**
@@ -198,7 +282,25 @@ class Model {
 	 * @throws ModelFetchException
 	 */
 	public function fetchVote($token) {
+		$query = sprintf("SELECT * FROM `Votes` WHERE `token`='%s'",
+					mysql_real_escape_string($token, $connections));
 
+		$result = mysql_query($query, $connection);
+
+		if (!$result) {
+			throw new ModelFetchException("Error fetching poll information.");
+		}
+
+		$data = mysql_fetch_object($result);
+
+		if (!$data) {
+			throw new ModelFetchException("Error fetching poll information.");
+		}
+
+		return new Poll($data.id, $data.title, $data.author,
+						$data.admin_email, $data.desciption,
+						$data.options, $data.mailing_list,
+						$data.end_date);
 	}
 
 	/**

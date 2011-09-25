@@ -12,7 +12,6 @@ $INPUT_FIELDS = Array('title' => 'Title',
 					  'end_time' => 'End date');
 
 if (isset($_POST['submit'])) {
-	$SAFE_INPUT =
 	$SANITIZED = Array();
 
 	/* Get values out of $_POST. */
@@ -24,17 +23,38 @@ if (isset($_POST['submit'])) {
 		}
 		catch (Exception $e)
 		{
+			echo "ERROR ERROR ERRROR ".$user_friendly_name;
 			error($user_friendly_name . " is a required field");
 		}
 	}
 
 	/* Sanitize fields that need it. */
-	if (!validate_email($SANITIZED['email'])) {
-		error("Email is invalid.");
-		unset($SANITIZED['email']);
+	if (isset($SANITIZED['admin_email']) && !validate_email($SANITIZED['admin_email'])) {
+		error("Admin email is invalid.");
+		unset($SANITIZED['admin_email']);
 	}
 
-	if (!validate_date($SANITIZED['end_time'])) {
+	if (isset($SANITIZED['mailing_list'])) {
+		/* Split mailing list into lines. */
+		$SANITIZED['mailing_list'] = preg_split("[ \r\n\t,;]+", $SANITIZED['mailing_list']);
+
+		if (count($SANITIZED['mailing_list']) <= 1) {
+			// Mailing list too short
+			error("A vote needs at least 2 participants.");
+			unset($SANITIZED['mailing_list']);
+		}
+		else {
+			// Verify each entry in list is an actual email
+			foreach ($SANITIZED['mailing_list'] as $email) {
+				if (strlen($email) > 3 && !validate_email($email)) {
+					error("Email list contains an invalid email.");
+					unset($SANITIZED['mailing_list']);
+				}
+			}
+		}
+	}
+
+	if (isset($SANITIZED['end_time']) && !validate_date($SANITIZED['end_time'])) {
 		error("End time invalid.");
 		unset($SANITIZED['end_time']);
 	}
@@ -46,7 +66,6 @@ if (isset($_POST['submit'])) {
 	 		$model = Model::getInstance();
 			$model.connect();
 			$model.insertPoll();
-			$model.close();
 		}
 		catch (ModelConnectException $e)
 		{
@@ -56,18 +75,14 @@ if (isset($_POST['submit'])) {
 		{
 			array_push($ERR, "Error creating vote");
 		}
-		catch (ModelCloseException $e)
-		{
-			// Not the best of outcomes, but
-			// at least we got the data into
-			// the model.
-		}
 	}
 }
 
 if (!isset($_POST['submit']) || error_occurred()) { ?>
     <section id="startvote">
     	<?php
+    		var_dump($_POST);
+    		var_dump($ERR);
     	if (error_occurred()) {
     		echo "<ul>";
 			foreach ($ERR as $err) {
@@ -76,7 +91,7 @@ if (!isset($_POST['submit']) || error_occurred()) { ?>
     		echo "</ul>";
     	}
     	?>
-		<form action="startvote" name="startvote_form">
+		<form action="startvote" name="startvote_form" method="post">
 			<table>
 				<tbody>
 					<tr>
@@ -116,9 +131,6 @@ if (!isset($_POST['submit']) || error_occurred()) { ?>
 		</form>
     </section>
 <?php
-}
-else { /* $_POST['submit'] isset, handle POST data */
-
 }
 
 require('include/footer.php'); ?>

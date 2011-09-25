@@ -12,8 +12,7 @@
  	{
  		$model = Model::getInstance();
 		$model->connect();
-		//$model->insertVote();
-		$model->close();
+		$model->getVote();
 	}
 	catch (ModelConnectException $e)
 	{
@@ -22,12 +21,6 @@
 	catch (ModelInsertException $e)
 	{
 		array_push($ERR, "Error creating vote");
-	}
-	catch (ModelCloseException $e)
-	{
-		// Not the best of outcomes, but
-		// at least we got the data into
-		// the model.
 	}
 	?>
 	<section id="vote">
