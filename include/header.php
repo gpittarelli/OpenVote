@@ -1,7 +1,7 @@
 <?php
 
 /* Global settings we won't trust the server to enforce. */
-// error_reporting(0);
+error_reporting(0);
 
 require_once('include/config.php');
 require_once('include/utility.php');

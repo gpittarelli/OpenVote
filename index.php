@@ -1,6 +1,6 @@
 <?php require('include/header.php'); ?>
     <section id="startavote">
-	  <a href="startvote" title="Start a Vote">
+	  <a href="startvote" title="Start a vote">
 		<img src="images/start_vote_button.png" width="415" height="75" alt="Start a Vote" title="Start a Vote" />
 	  </a>
     </section>
@@ -19,7 +19,7 @@
 			poll.  At the end of the poll, anyone may download a list of
 			votes in order to verify the results and ensure that their vote
 			was counted correctly.  We are also
-			<a href="https://github.com/gpittarelli/OpenVote">Open Source</a>
+			<a href="https://github.com/gpittarelli/OpenVote" title="Source code">Open Source</a>
 			so you can view or improve our code.
 		</p>
     </section>
